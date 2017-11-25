@@ -1,6 +1,6 @@
 #pragma once
 #include "GameObject.h"
-class Player :
+class Laser :
 	public GameObject
 {
 public:
@@ -9,11 +9,9 @@ public:
 	Vector2f getPosition();
 	FloatRect getCollider();
 	int getType();
-	Player(Texture* texture, Texture* thrusterTexture);
-	~Player();
+	Laser(Vector2f position, Vector2f facing);
+	~Laser();
 private:
 	RectangleShape shape;
-	RectangleShape thruster;
-	bool drawThruster;
 };
 

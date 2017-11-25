@@ -8,11 +8,9 @@ public:
 	virtual void draw(RenderWindow* window) = 0;
 	virtual FloatRect getCollider() = 0;
 	virtual Vector2f getPosition() = 0;
-
-	virtual Vector2f getFacing();
-	virtual void setFacing(Vector2f facing);
-	virtual Vector2f getVelocity();
-	virtual void setVelocity(Vector2f velocity);
+	virtual int getType() = 0;
+	virtual Vector2f getFacing();	
+	virtual Vector2f getVelocity();	
 	virtual float getSpeed();
 	virtual void setSpeed(float speed);
 	GameObject();
@@ -21,7 +19,6 @@ protected:
 	Vector2f facing;
 	Vector2f velocity;
 	float speed;
-
 
 };
 

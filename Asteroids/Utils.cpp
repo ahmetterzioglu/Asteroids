@@ -26,6 +26,35 @@ float vectorMagnitude(Vector2f vector) {
 	return sqrtf(vector.x * vector.x + vector.y * vector.y);
 }
 
-Vector2f oppositeVector(Vector2f vector) {
-	return Vector2f(-vector.x, -vector.y);
+Vector2i getBucket(Vector2f pos)
+{
+	int col = int(pos.x / BUCKET_SIZE);
+	if (col < 0)
+		col = 0;
+	else if (col >= SCREEN_WIDTH/BUCKET_SIZE )
+		col = SCREEN_WIDTH / BUCKET_SIZE - 1;
+
+	int row = int(pos.y / BUCKET_SIZE);
+	if (row < 0)
+		row = 0;
+	else if (row >= SCREEN_HEIGHT / BUCKET_SIZE)
+		row = SCREEN_HEIGHT / BUCKET_SIZE - 1;
+
+	return Vector2i(col, row);
+}
+
+Vector2f wrapAround(Vector2f position) {
+	if (position.x > SCREEN_WIDTH) {
+		position.x = 0;
+	}
+	if (position.x < 0) {
+		position.x = SCREEN_WIDTH;
+	}
+	if (position.y > SCREEN_HEIGHT) {
+		position.y = 0;
+	}
+	if (position.y < 0) {
+		position.y = SCREEN_HEIGHT;
+	}
+	return position;
 }

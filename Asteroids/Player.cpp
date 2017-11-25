@@ -1,20 +1,24 @@
 #include "Player.h"
 #include "Utils.h"
-#include <iostream>
+
 using namespace std;
-Player::Player()
+Player::Player(Texture* texture, Texture* thrusterTexture)
 {
 	drawThruster = false;
-	shape.setPosition(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
-	shape.setFillColor(Color::Blue);
+	shape.setPosition(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);	
+	shape.setTexture(texture);
 	shape.setSize(PLAYER_SIZE);
 	shape.setOrigin(PLAYER_SIZE.x / 2, PLAYER_SIZE.y / 2);
-	setVelocity(Vector2f(0, 0));
-	setFacing(getDirectionVectorFromDegrees(shape.getRotation()));
+	velocity = (Vector2f(0, 0));
+	facing = (getDirectionVectorFromDegrees(shape.getRotation()));
 	thruster.setOrigin(THRUSTER_SIZE.x / 2, THRUSTER_SIZE.y / 2);
-	thruster.setPosition(shape.getPosition()- facing*THRUSTER_OFFSET);
-	thruster.setFillColor(Color::Red);
+	thruster.setPosition(shape.getPosition()- facing*THRUSTER_OFFSET);	
+	thruster.setTexture(thrusterTexture);
 	thruster.setSize(THRUSTER_SIZE);
+}
+
+int Player::getType() {
+	return GOPLAYER;
 }
 
 Vector2f Player::getPosition() {
@@ -57,22 +61,10 @@ void Player::update(float dt) {
 	}
 	Vector2f position = getPosition();
 	position += velocity;
-	if (position.x > SCREEN_WIDTH) {
-		position.x = 0;
-	}
-	if (position.x < 0) {
-		position.x = SCREEN_WIDTH;
-	}
-	if (position.y > SCREEN_HEIGHT) {
-		position.y = 0;
-	}
-	if (position.y < 0) {
-		position.y = SCREEN_HEIGHT;
-	}
-
-	shape.setPosition(position);
+	shape.setPosition(wrapAround(position));
 	thruster.setPosition(shape.getPosition() - facing*THRUSTER_OFFSET);
 	thruster.setRotation(shape.getRotation());
+	
 
 }
 void Player::draw(RenderWindow* window) {
