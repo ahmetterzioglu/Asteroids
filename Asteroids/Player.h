@@ -6,7 +6,10 @@ class Player :
 public:
 	void update(float dt);
 	void draw(RenderWindow* window);
+	void collide();
 	Vector2f getPosition();
+	int getRotation();
+	float getSpeed();
 	FloatRect getCollider();
 	int getType();
 	Player(Texture* texture, Texture* thrusterTexture);

@@ -2,15 +2,24 @@
 #include "Utils.h"
 
 
-Laser::Laser(Vector2f position, Vector2f facing)
+Laser::Laser(Vector2f position, Vector2f facing, int rotation)
 {
-
+	
 	shape.setFillColor(Color::Cyan);
 	shape.setSize(LASER_SIZE);
 	shape.setOrigin(LASER_SIZE.x / 2, LASER_SIZE.y / 2);
 	shape.setPosition(position);
+	shape.setRotation(rotation);
 	velocity = (Vector2f(0, 0));
 	this->facing = facing;
+}
+
+void Laser::collide() {
+	
+}
+
+void Laser::draw(RenderWindow* window) {
+	window->draw(shape);
 }
 
 int Laser::getType() {

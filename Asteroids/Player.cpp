@@ -17,6 +17,10 @@ Player::Player(Texture* texture, Texture* thrusterTexture)
 	thruster.setSize(THRUSTER_SIZE);
 }
 
+void Player::collide() {
+	shape.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+}
+
 int Player::getType() {
 	return GOPLAYER;
 }
@@ -27,6 +31,14 @@ Vector2f Player::getPosition() {
 
 FloatRect Player::getCollider() {
 	return shape.getGlobalBounds();
+}
+
+int Player::getRotation() {
+	return shape.getRotation();
+}
+
+float Player::getSpeed() {
+	return vectorMagnitude(velocity);
 }
 
 void Player::update(float dt) {

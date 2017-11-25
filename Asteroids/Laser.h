@@ -9,7 +9,8 @@ public:
 	Vector2f getPosition();
 	FloatRect getCollider();
 	int getType();
-	Laser(Vector2f position, Vector2f facing);
+	void collide();
+	Laser(Vector2f position, Vector2f facing, int rotation);
 	~Laser();
 private:
 	RectangleShape shape;

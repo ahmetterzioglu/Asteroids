@@ -9,6 +9,7 @@ public:
 	virtual FloatRect getCollider() = 0;
 	virtual Vector2f getPosition() = 0;
 	virtual int getType() = 0;
+	virtual void collide() = 0;
 	virtual Vector2f getFacing();	
 	virtual Vector2f getVelocity();	
 	virtual float getSpeed();

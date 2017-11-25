@@ -8,15 +8,16 @@
 #include <iostream>
 #include "Utils.h"
 #include "Player.h"
+#include "Laser.h"
 using namespace sf;
 using namespace std;
 
 void getEvents();
 void updateState(vector<GameObject*> gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS], float dt);
-void renderFrame(Player player);
+void renderFrame(vector<GameObject*> gameObjects);
 void bucket_remove(Vector2i b, GameObject* obj, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS]);
 void bucket_add(Vector2i b, GameObject* obj, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS]);
-
+Laser* createLaser(Player* player);
 
 RenderWindow window;
 
@@ -25,6 +26,7 @@ int main()
 	window.create(VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Asteroids");
 	Clock clock;
 	Texture playerTexture;
+	float laserTimer = 0;
 	if (!playerTexture.loadFromFile("player.png"))
 	{
 		cout << "texture1 Image couldn't load!";
@@ -66,10 +68,17 @@ int main()
 	{
 		getEvents();
 		float dt = clock.restart().asSeconds();
+		laserTimer += dt;
+		if (Keyboard::isKeyPressed(Keyboard::Space) && laserTimer >= LASER_COOLDOWN) {
+			laserTimer = 0;
+			Laser* laser = createLaser(player);
+			gameObjects.push_back(laser);
+			bucket_add(getBucket(laser->getPosition()), laser, buckets);
+		}
 		updateState(gameObjects, buckets, dt);
-		renderFrame(*player);
+		renderFrame(gameObjects);
 		//////////////////////////////////////
-		uiText.setString(to_string(getBucket(player->getPosition()).x) + " " + to_string(getBucket(player->getPosition()).y));
+		uiText.setString(to_string(laserTimer) + " Bucket: "+to_string(getBucket(player->getPosition()).x) + " " + to_string(getBucket(player->getPosition()).y));
 		window.draw(uiText);
 		///////////////////////////////////////
 
@@ -79,17 +88,21 @@ int main()
 	return 0;
 }
 
+Laser* createLaser(Player* player) {
+	Laser* laser = new Laser(player->getPosition() + player->getFacing() * LASER_OFFSET, player->getFacing(), player->getRotation());
+	return laser;
+}
+
 void updateState(vector<GameObject*> gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS], float dt) {
-	for (int i = 0; i < gameObjects.size(); ++i)
+	for each(GameObject* gameObject in gameObjects)
 	{
-		GameObject * obj = gameObjects[i];
-		Vector2i curBucket = getBucket(obj->getPosition());
-		obj->update(dt);
-		Vector2i newBucket = getBucket(obj->getPosition());
+		Vector2i curBucket = getBucket(gameObject->getPosition());
+		gameObject->update(dt);
+		Vector2i newBucket = getBucket(gameObject->getPosition());
 		if (curBucket != newBucket)
 		{
-			bucket_remove(curBucket, obj, buckets);
-			bucket_add(newBucket, obj, buckets);
+			bucket_remove(curBucket, gameObject, buckets);
+			bucket_add(newBucket, gameObject, buckets);
 		}
 		//detect_collisions(obj, newBucket);
 	}
@@ -118,9 +131,11 @@ void bucket_remove(Vector2i bucket,	GameObject* obj, vector<GameObject*>* bucket
 
 
 
-void renderFrame(Player player) {
+void renderFrame(vector<GameObject*> gameObjects) {
 	window.clear(Color(0, 0, 0));
-	player.draw(&window);
+	for each(GameObject* go in gameObjects) {
+		go->draw(&window);
+	}
 }
 
 void getEvents() {
