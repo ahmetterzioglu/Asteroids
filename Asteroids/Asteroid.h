@@ -1,19 +1,20 @@
 #pragma once
 #include "GameObject.h"
-class Laser :
+#include "Utils.h"
+class Asteroid :
 	public GameObject
 {
 public:
 	void update(float dt);
 	void draw(RenderWindow* window);
+	void collide();
 	Vector2f getPosition();
 	FloatRect getCollider();
 	int getType();
-	void collide();
-	Laser(Vector2f position, Vector2f facing, int rotation);
-	~Laser();
+	Asteroid(Texture* texture, Vector2f position, int lives, int level);
+	~Asteroid();
 private:
-	RectangleShape shape;
-	float timer;
+	CircleShape shape;
+	int level;
 };
 

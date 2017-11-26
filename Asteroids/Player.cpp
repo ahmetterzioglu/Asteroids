@@ -4,11 +4,12 @@
 using namespace std;
 Player::Player(Texture* texture, Texture* thrusterTexture)
 {
+	lives = PLAYER_LIVES;
 	drawThruster = false;
+	shape.setRadius(PLAYER_SIZE);
+	shape.setOrigin(PLAYER_SIZE , PLAYER_SIZE);
 	shape.setPosition(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);	
 	shape.setTexture(texture);
-	shape.setSize(PLAYER_SIZE);
-	shape.setOrigin(PLAYER_SIZE.x / 2, PLAYER_SIZE.y / 2);
 	velocity = (Vector2f(0, 0));
 	facing = (getDirectionVectorFromDegrees(shape.getRotation()));
 	thruster.setOrigin(THRUSTER_SIZE.x / 2, THRUSTER_SIZE.y / 2);
@@ -19,6 +20,10 @@ Player::Player(Texture* texture, Texture* thrusterTexture)
 
 void Player::collide() {
 	shape.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	--lives;
+	if (lives == 0) {
+		toBeDestroyed = true;
+	}
 }
 
 int Player::getType() {

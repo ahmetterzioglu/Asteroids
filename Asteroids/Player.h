@@ -15,7 +15,7 @@ public:
 	Player(Texture* texture, Texture* thrusterTexture);
 	~Player();
 private:
-	RectangleShape shape;
+	CircleShape shape;
 	RectangleShape thruster;
 	bool drawThruster;
 };

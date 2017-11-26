@@ -44,6 +44,7 @@ Vector2i getBucket(Vector2f pos)
 }
 
 Vector2f wrapAround(Vector2f position) {
+
 	if (position.x > SCREEN_WIDTH) {
 		position.x = 0;
 	}
@@ -58,3 +59,16 @@ Vector2f wrapAround(Vector2f position) {
 	}
 	return position;
 }
+
+bool doCirclesCollide(Vector2f p1, float r1, Vector2f p2, float r2) {
+	Vector2f o1 = p1 + Vector2f(r1, r1);
+	Vector2f o2 = p2 + Vector2f(r2, r2);
+	float distance = distanceBetween(p1, p2);
+	return distance < (r1 + r2);
+}
+
+bool doesCircleAndPointCollide(Vector2f position, float r1, Vector2f point) {
+	float distance = distanceBetween(position , point);
+	return distance < r1;
+}
+
