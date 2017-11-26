@@ -1,6 +1,6 @@
 #include "Player.h"
 #include "Utils.h"
-
+#include <iostream>
 using namespace std;
 Player::Player(Texture* texture, Texture* thrusterTexture)
 {
@@ -20,9 +20,11 @@ Player::Player(Texture* texture, Texture* thrusterTexture)
 
 void Player::collide() {
 	shape.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	velocity = (Vector2f(0, 0));
+	shape.setRotation(0);
 	--lives;
 	if (lives == 0) {
-		toBeDestroyed = true;
+		//toBeDestroyed = true;
 	}
 }
 
@@ -63,7 +65,8 @@ void Player::update(float dt) {
 
 	if (Keyboard::isKeyPressed(Keyboard::Up)) {
 		drawThruster = true;
-		Vector2f newVelocity = velocity + facing * dt * ACCELERATION;		
+		Vector2f newVelocity = velocity + facing * dt * ACCELERATION;	
+		//std::cout << vectorMagnitude(velocity) << std::endl;
 		if (vectorMagnitude(newVelocity) <= MAXSPEED) {
 			velocity = newVelocity;
 		}
@@ -78,7 +81,7 @@ void Player::update(float dt) {
 	}
 	Vector2f position = getPosition();
 	position += velocity;
-	shape.setPosition(wrapAround(position));
+	shape.setPosition(wrapAround(position, PLAYER_SIZE, PLAYER_SIZE));
 	thruster.setPosition(shape.getPosition() - facing*THRUSTER_OFFSET);
 	thruster.setRotation(shape.getRotation());
 	

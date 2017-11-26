@@ -43,19 +43,19 @@ Vector2i getBucket(Vector2f pos)
 	return Vector2i(col, row);
 }
 
-Vector2f wrapAround(Vector2f position) {
+Vector2f wrapAround(Vector2f position, float x, float y) {
 
-	if (position.x > SCREEN_WIDTH) {
-		position.x = 0;
+	if (position.x - x > SCREEN_WIDTH) {
+		position.x = 0 -x;
 	}
-	if (position.x < 0) {
-		position.x = SCREEN_WIDTH;
+	if (position.x + x < 0) {
+		position.x = SCREEN_WIDTH + x;
 	}
-	if (position.y > SCREEN_HEIGHT) {
-		position.y = 0;
+	if (position.y - y > SCREEN_HEIGHT) {
+		position.y = 0 - x;
 	}
-	if (position.y < 0) {
-		position.y = SCREEN_HEIGHT;
+	if (position.y + y < 0) {
+		position.y = SCREEN_HEIGHT + y;
 	}
 	return position;
 }

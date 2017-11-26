@@ -25,6 +25,8 @@ vector<GameObject*>* detect_collisions(vector<GameObject*>* gameObjects, GameObj
 RenderWindow window;
 Texture asteroidTexture;
 int currentLevel = 1;
+int gameState = RUN_GAME;
+int score = 0;
 int main()
 {
 	srand(static_cast<unsigned int>(std::time(NULL)));
@@ -72,7 +74,14 @@ int main()
 	uiText.setFont(font);
 	uiText.setPosition((SCREEN_WIDTH / 2) - 200, SCREEN_HEIGHT - 30);
 	uiText.setFillColor(Color::White);
-	uiText.setString(to_string(getBucket(player->getPosition()).x)+" "+ to_string(getBucket(player->getPosition()).y));
+	
+	Text gameOverText;
+	gameOverText.setCharacterSize(80);
+	gameOverText.setFont(font);
+	gameOverText.setPosition((SCREEN_WIDTH / 2) - 200, SCREEN_HEIGHT / 2);
+	gameOverText.setFillColor(Color::Red);
+	gameOverText.setString("GAME OVER");
+
 	//////////////////////////////////////////////////
 
 	while (window.isOpen())
@@ -80,18 +89,31 @@ int main()
 		getEvents();
 		float dt = clock.restart().asSeconds();
 		laserTimer += dt;
-		if (Keyboard::isKeyPressed(Keyboard::Space) && laserTimer >= LASER_COOLDOWN) {
-			laserTimer = 0;
-			Laser* laser = createLaser(player);
-			gameObjects.push_back(laser);
-			bucket_add(laser, buckets);
+		if (gameState == MAIN_MENU) {
+		
 		}
-		updateState(&gameObjects, buckets, dt);
-		renderFrame(gameObjects);
-		//////////////////////////////////////
-		uiText.setString(to_string(laserTimer) + " Bucket: "+to_string(getBucket(player->getPosition()).x) + " " + to_string(getBucket(player->getPosition()).y));
-		window.draw(uiText);
-		///////////////////////////////////////
+		else if (gameState == RUN_GAME) {
+		
+			if (Keyboard::isKeyPressed(Keyboard::Space) && laserTimer >= LASER_COOLDOWN) {
+				laserTimer = 0;
+				Laser* laser = createLaser(player);
+				gameObjects.push_back(laser);
+				bucket_add(laser, buckets);
+			}
+			if (!updateState(&gameObjects, buckets, dt)) {
+				createLevel(++currentLevel, &gameObjects, buckets);
+			}
+			renderFrame(gameObjects);
+			uiText.setString("Lives: " + to_string(player->getLives()) + "      Score: " + to_string(score));
+			window.draw(uiText);
+		}
+		else if (gameState == GAME_OVER) {
+			window.clear();
+			uiText.setString("Score: " + to_string(player->getLives()));
+			window.draw(uiText);
+			window.draw(gameOverText);
+		}
+		
 
 		window.display();
 	}
@@ -100,7 +122,7 @@ int main()
 }
 
 void createLevel(int currentLevel, vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS]) {
-	for (int i = 0; i < currentLevel + 4; i++) {
+	for (int i = 0; i < currentLevel + 1; i++) {
 		int x = rand() % 1024;
 		int y = rand() % 768;
 		Asteroid* asteroid = new Asteroid(&asteroidTexture, Vector2f(x, y), ASTEROID_LIVES, currentLevel);
@@ -144,11 +166,14 @@ bool updateState(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[
 			continue;
 		}
 		i++;
+		delete temp;
+		temp = nullptr;
 	}
 	for each(GameObject* gameObject in *toBeAdded) {
 		gameObjects->push_back(gameObject);
 		bucket_add(gameObject, buckets);
 	}
+	
 	delete toBeAdded;
 	toBeAdded = nullptr;
 	return hasAsteroidsLeft;
@@ -197,6 +222,17 @@ vector<GameObject*>* detect_collisions(vector<GameObject*>* gameObjects, GameObj
 				if (collision && otherObject->getLives() == 1) {
 					gameObject->collide();
 					otherObject->collide();
+				}
+			}
+			else if (gameObject->getType() == GOPLAYER && otherObject->getType() == GOASTEROID) {
+				bool collision = false;
+				collision = doCirclesCollide(gameObject->getPosition(), PLAYER_SIZE, otherObject->getPosition(), ASTEROID_SIZE * otherObject->getLives());
+				if (collision) {
+					gameObject->collide();
+				}
+				if (gameObject->getLives()==0) {
+					gameState = GAME_OVER;
+					return toBeAdded;
 				}
 			}
 		}

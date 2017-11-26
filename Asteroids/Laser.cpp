@@ -10,8 +10,8 @@ Laser::Laser(Vector2f position, Vector2f facing, int rotation)
 	shape.setOrigin(LASER_SIZE.x / 2, LASER_SIZE.y / 2);
 	shape.setPosition(position);
 	shape.setRotation(rotation);
-	shape.setOutlineColor(Color::White);
-	shape.setOutlineThickness(1);
+	//shape.setOutlineColor(Color::White);
+	//shape.setOutlineThickness(1);
 	velocity = (Vector2f(0, 0));
 	this->facing = facing;
 	timer = LASER_TIMER;
@@ -41,7 +41,7 @@ void Laser::update(float dt) {
 	timer -= dt;
 	Vector2f position = getPosition();
 	position += facing * LASER_SPEED * dt;
-	shape.setPosition(wrapAround(position));
+	shape.setPosition(wrapAround(position, LASER_SIZE.x, LASER_SIZE.y));
 	if (timer <= 0) {
 		toBeDestroyed = true;
 	}
