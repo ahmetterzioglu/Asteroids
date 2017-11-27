@@ -72,3 +72,8 @@ bool doesCircleAndPointCollide(Vector2f position, float r1, Vector2f point) {
 	return distance < r1;
 }
 
+bool isPointInRectangle(Vector2f rectanglePos, Vector2f renctangleSize, Vector2i point) {
+	return (point.x >= rectanglePos.x) && (point.x <= rectanglePos.x + renctangleSize.x)
+		&& (point.y >= rectanglePos.y) && (point.y <= rectanglePos.y + renctangleSize.y);
+}
+

@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include <SFML/Audio.hpp>
 class Player :
 	public GameObject
 {
@@ -10,13 +11,16 @@ public:
 	Vector2f getPosition();
 	int getRotation();
 	float getSpeed();
-	FloatRect getCollider();
 	int getType();
-	Player(Texture* texture, Texture* thrusterTexture);
+	Vector2f getLaserPosition();
+	Player(Texture* texture, Texture* thrusterTexture, SoundBuffer thrusterSound);
 	~Player();
 private:
 	CircleShape shape;
 	RectangleShape thruster;
 	bool drawThruster;
+	float invulTimer;
+	Sound sound;
+	SoundBuffer thrusterSound;
 };
 

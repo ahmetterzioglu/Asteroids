@@ -6,7 +6,6 @@ class GameObject
 public:
 	virtual void update(float dt) = 0;
 	virtual void draw(RenderWindow* window) = 0;
-	virtual FloatRect getCollider() = 0;
 	virtual Vector2f getPosition() = 0;
 	virtual int getType() = 0;
 	virtual void collide() = 0;

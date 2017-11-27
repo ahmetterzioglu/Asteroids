@@ -33,10 +33,6 @@ Vector2f Laser::getPosition() {
 	return shape.getPosition();
 }
 
-FloatRect Laser::getCollider() {
-	return shape.getGlobalBounds();
-}
-
 void Laser::update(float dt) {
 	timer -= dt;
 	Vector2f position = getPosition();

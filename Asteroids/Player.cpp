@@ -2,8 +2,10 @@
 #include "Utils.h"
 #include <iostream>
 using namespace std;
-Player::Player(Texture* texture, Texture* thrusterTexture)
+Player::Player(Texture* texture, Texture* thrusterTexture, SoundBuffer thrusterSound)
 {
+	this->thrusterSound = thrusterSound;
+	invulTimer = 0;
 	lives = PLAYER_LIVES;
 	drawThruster = false;
 	shape.setRadius(PLAYER_SIZE);
@@ -19,12 +21,12 @@ Player::Player(Texture* texture, Texture* thrusterTexture)
 }
 
 void Player::collide() {
-	shape.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-	velocity = (Vector2f(0, 0));
-	shape.setRotation(0);
-	--lives;
-	if (lives == 0) {
-		//toBeDestroyed = true;
+	if (invulTimer <= 0) {
+		--lives;	
+		invulTimer = INVUL_COOLDOWN;
+		shape.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		velocity = (Vector2f(0, 0));
+		shape.setRotation(0);
 	}
 }
 
@@ -33,11 +35,10 @@ int Player::getType() {
 }
 
 Vector2f Player::getPosition() {
+	if (invulTimer > 0) {
+		return Vector2f(-1000, -1000);
+	}
 	return shape.getPosition();
-}
-
-FloatRect Player::getCollider() {
-	return shape.getGlobalBounds();
 }
 
 int Player::getRotation() {
@@ -48,7 +49,22 @@ float Player::getSpeed() {
 	return vectorMagnitude(velocity);
 }
 
+Vector2f Player::getLaserPosition() {
+	return shape.getPosition();
+}
+
 void Player::update(float dt) {
+	if (invulTimer > 0) {
+		shape.setFillColor(Color::Blue);
+		shape.setOutlineColor(Color::Blue);
+		shape.setOutlineThickness(2);
+		invulTimer -= dt;
+	}
+	else {
+		shape.setFillColor(Color::White);
+		shape.setOutlineColor(Color::White);
+		shape.setOutlineThickness(0);
+	}
 	float rotation;
 	if (Keyboard::isKeyPressed(Keyboard::Left)){
 		rotation = shape.getRotation();
@@ -64,22 +80,27 @@ void Player::update(float dt) {
 	facing = getDirectionVectorFromDegrees(rotation);
 
 	if (Keyboard::isKeyPressed(Keyboard::Up)) {
+		if (sound.getStatus() != sound.Playing) {
+			sound.setVolume(50);
+			sound.setBuffer(thrusterSound);
+			sound.play();
+		}
 		drawThruster = true;
 		Vector2f newVelocity = velocity + facing * dt * ACCELERATION;	
-		//std::cout << vectorMagnitude(velocity) << std::endl;
 		if (vectorMagnitude(newVelocity) <= MAXSPEED) {
 			velocity = newVelocity;
 		}
 	}
 	else {
 		drawThruster = false;
+		sound.stop();
 	}
 
 	if (vectorMagnitude(velocity) > 0) {
 		Vector2f drag = normalizeVector(velocity) * dt * DRAG_MULTIPLIER;
 		velocity -= drag;
 	}
-	Vector2f position = getPosition();
+	Vector2f position = shape.getPosition();
 	position += velocity;
 	shape.setPosition(wrapAround(position, PLAYER_SIZE, PLAYER_SIZE));
 	thruster.setPosition(shape.getPosition() - facing*THRUSTER_OFFSET);
