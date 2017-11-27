@@ -47,3 +47,4 @@ Vector2f wrapAround(Vector2f position, float x, float y);
 bool doCirclesCollide(Vector2f p1, float r1, Vector2f p2, float r2);
 bool doesCircleAndPointCollide(Vector2f origin, float r1, Vector2f point);
 bool isPointInRectangle(Vector2f rectanglePos, Vector2f renctangleSize, Vector2i point);
+float randomNumberAroundZero(float number);

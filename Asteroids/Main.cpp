@@ -56,10 +56,22 @@ int main()
 	//LOAD ASSETS
 	//////////////////////////////////////////////////////
 	//Sounds
-	thrusterSound.loadFromFile("thruster.wav");
-	laserSound.loadFromFile("laser.wav");
-	explosionSound.loadFromFile("explosion.wav");
-	winSound.loadFromFile("win.wav");
+	if(!thrusterSound.loadFromFile("thruster.wav"))
+	{
+		cout << "thrusterSound couldn't load!";
+	}
+	if (!laserSound.loadFromFile("laser.wav"))
+	{
+		cout << "laserSound couldn't load!";
+	}
+	if (!explosionSound.loadFromFile("explosion.wav"))
+	{
+		cout << "explosionSound couldn't load!";
+	}
+	if (!winSound.loadFromFile("win.wav")) 
+	{
+		cout << "winSound couldn't load!";
+	}
 	soundWin.setBuffer(winSound);
 	soundExplosion.setBuffer(explosionSound);
 	soundLaser.setBuffer(laserSound);
@@ -135,15 +147,18 @@ int main()
 	exitText.setFillColor(Color::Red);
 	exitText.setString("EXIT GAME");
 	/////////////////////////////////////////////////////
-
+	//Create containers
 	vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS];
 	vector<GameObject*> gameObjects;
 	Player* player = nullptr;
+	//////////////////////////////////////////////////////
+	//Main game loop
 	while (window.isOpen())
 	{
 		getEvents();
 		float dt = clock.restart().asSeconds();
 
+		//show main menu
 		if (gameState == MAIN_MENU) {
 			Vector2i mousePos = Mouse::getPosition(window);
 			showMainMenu(startButton, exitButton, startText, exitText, mousePos);
@@ -151,6 +166,7 @@ int main()
 				handleMouseClick(startButton, exitButton, mousePos);
 			}
 		}
+		//reset game in case a game was played prevoiusly
 		else if (gameState == LOADING) {		
 			for (int i = 0; i < BUCKET_COLS; i++) {
 				for (int j = 0; j < BUCKET_ROWS; j++) {
@@ -174,6 +190,7 @@ int main()
 
 			gameState = RUN_GAME;
 		}
+		//update loop
 		else if (gameState == RUN_GAME) {
 		
 			laserTimer += dt;
@@ -183,6 +200,7 @@ int main()
 			if (Keyboard::isKeyPressed(Keyboard::Space) && laserTimer >= LASER_COOLDOWN) {
 				laserTimer = createLaser(&gameObjects, buckets, player);				
 			}
+			//if no asteroids left, create new level
 			if (!updateState(&gameObjects, buckets, dt)) {
 				soundWin.play();
 				currentLevel++;
@@ -192,6 +210,7 @@ int main()
 			uiText.setString("Lives: " + to_string(player->getLives()) + "      Score: " + to_string(score)+"      Level: "+to_string(currentLevel));
 			window.draw(uiText);
 		}
+		//show game over screen for 3 seconds
 		else if (gameState == GAME_OVER) {
 			if (gameOverTimer >= 0) {
 				gameOverTimer -= dt;
@@ -212,6 +231,7 @@ int main()
 	return 0;
 }
 
+//adds the laser to the game 
 int createLaser(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS], Player* player) {
 	Laser* laser = instantiateLaser(player);
 	addGameObject(laser, gameObjects, buckets);
@@ -219,11 +239,13 @@ int createLaser(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[B
 	return 0;
 }
 
+//adds gameobject to gameObjects and approporiate bucket
 void addGameObject(GameObject* gameObject, vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS]) {
 	gameObjects->push_back(gameObject);
 	bucket_add(gameObject, buckets);
 }
 
+//Mouse click for main menu
 void handleMouseClick(RectangleShape startButton, RectangleShape exitButton,Vector2i mousePos) {
 	if (isPointInRectangle(startButton.getPosition(), startButton.getSize(), mousePos)) {
 		gameState = LOADING;
@@ -233,6 +255,7 @@ void handleMouseClick(RectangleShape startButton, RectangleShape exitButton,Vect
 	}
 }
 
+//display main menu
 void showMainMenu(RectangleShape startButton, RectangleShape exitButton, Text startText, Text exitText, Vector2i mousePos){
 	window.clear();
 	handleMouseOver(&startButton, mousePos);
@@ -243,6 +266,7 @@ void showMainMenu(RectangleShape startButton, RectangleShape exitButton, Text st
 	window.draw(exitText);
 }
 
+//MouseOvers for main menu
 void handleMouseOver(RectangleShape* shape, Vector2i mousePos) {
 	if (isPointInRectangle(shape->getPosition(), shape->getSize(), mousePos)) {
 		shape->setFillColor(Color::Yellow);
@@ -254,32 +278,44 @@ void handleMouseOver(RectangleShape* shape, Vector2i mousePos) {
 	}
 }
 
+//create and place the asteroids for new level
 void createLevel(int currentLevel, vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS], Player* player) {
 	for (int i = 0; i < currentLevel + 1; i++) {
 		int x, y;
+		//don't spawn asteroids on the player
 		do {
 			x = rand() % (int)SCREEN_WIDTH;
 			y = rand() % (int)SCREEN_HEIGHT;
-		} while (doCirclesCollide(player->getPosition(), PLAYER_SIZE, Vector2f(x,y), ASTEROID_SIZE*ASTEROID_LIVES));
+		} while (doCirclesCollide(player->getPosition(), PLAYER_SIZE * 2, Vector2f(x,y), ASTEROID_SIZE*ASTEROID_LIVES));
 		Asteroid* asteroid = new Asteroid(&asteroidTexture, Vector2f(x, y), ASTEROID_LIVES, currentLevel);
 		addGameObject(asteroid, gameObjects, buckets);
 	}
 }
 
+//Create a laser
 Laser* instantiateLaser(Player* player) {
 	Laser* laser = new Laser(player->getLaserPosition() + player->getFacing() * LASER_OFFSET, player->getFacing(), player->getRotation());
 	return laser;
 }
 
+//updateState returns false if there are no asteroids left
 bool updateState(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS], float dt) {
 	bool hasAsteroidsLeft = false;
+
+	//objects to be added on the next tick
 	vector<GameObject*>* toBeAdded = new vector<GameObject*>;
+
+	//iterate through all objects
 	for (int i = 0; i < gameObjects->size();)
 	{
 		GameObject* gameObject = *(gameObjects->begin() + i);
+
+		//check if the game still has asteroids left
 		if (gameObject->getType() == GOASTEROID) {
 			hasAsteroidsLeft = true;
 		}
+
+		//update and manage buckets
 		Vector2i curBucket = getBucket(gameObject->getPosition());
 		gameObject->update(dt);
 		Vector2i newBucket = getBucket(gameObject->getPosition());
@@ -289,12 +325,13 @@ bool updateState(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[
 			bucket_add(gameObject, buckets);
 		}
 		
-		//collect the new asteroids
+		//collect the new asteroids and explosions created at detect_collisions
 		vector<GameObject*>* temp = detect_collisions(gameObjects, gameObject, newBucket, buckets);
 		for each(GameObject* gameObject in *temp) {
 			toBeAdded->push_back(gameObject);
 		}
-		//Remove game objects marked for deletion
+
+		//Remove game objects marked for deletion at the detect_collision function
 		if (gameObject->isToBeDestroyed()) {
 			gameObjects->erase(gameObjects->begin() + i);
 			bucket_remove(newBucket, gameObject, buckets);
@@ -306,7 +343,8 @@ bool updateState(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[
 		delete temp;
 		temp = nullptr;
 	}
-	//add the new asteroids
+
+	//add the new objects after iteration ends
 	for each(GameObject* gameObject in *toBeAdded) {
 		addGameObject(gameObject, gameObjects, buckets);
 	}
@@ -318,22 +356,26 @@ bool updateState(vector<GameObject*>* gameObjects, vector<GameObject*>* buckets[
 
 vector<GameObject*>* detect_collisions(vector<GameObject*>* gameObjects, GameObject* gameObject, Vector2i bucket, vector<GameObject*>* buckets[BUCKET_COLS][BUCKET_ROWS]) {
 	vector<GameObject*>* toBeAdded = new vector<GameObject*>;
+
+	//calculate buckets around the object's bucket
 	vector<Vector2i> possibleBuckets;
 	for (int i = -1; i <= 1; i++) {
 		for (int j = -1; j <= 1; j++) {
 			int x = (bucket.x + i);
 			int y = (bucket.y + j);
 			if (x >= 0 && x < BUCKET_COLS && y >= 0 && y < BUCKET_ROWS) {
-
 				possibleBuckets.push_back(Vector2i(x, y));		
 			}
 		}
 	}
+
+	//iterate through all relevant objects
 	for each(Vector2i bucket in possibleBuckets) {
 		for each(GameObject* otherObject in *buckets[bucket.x][bucket.y]) {
 			if (otherObject == gameObject) {
 				continue;
 			}
+			//Asteroid to asteroid collisions
 			if (gameObject->getType() == GOASTEROID && otherObject->getType()==GOASTEROID) {
 				bool collision = false;
 				collision = doCirclesCollide(gameObject->getPosition(), ASTEROID_SIZE * gameObject->getLives(), otherObject->getPosition(), ASTEROID_SIZE * otherObject->getLives());
@@ -343,12 +385,13 @@ vector<GameObject*>* detect_collisions(vector<GameObject*>* gameObjects, GameObj
 					otherObject->setVelocity(-direction);
 				}
 			}
+			//Laser to Asteroid collisions
 			else if (gameObject->getType() == GOLASER && otherObject->getType() == GOASTEROID) {
 				bool collision = false;
 				collision = doesCircleAndPointCollide(otherObject->getPosition(), ASTEROID_SIZE * otherObject->getLives(), gameObject->getPosition());
 				if (collision && otherObject->getLives() > 1) {
-					Vector2f o1(otherObject->getPosition().x - otherObject->getLives() * ASTEROID_SIZE, otherObject->getPosition().y );
-					Vector2f o2(otherObject->getPosition().x + otherObject->getLives() * ASTEROID_SIZE, otherObject->getPosition().y );
+					Vector2f o1(otherObject->getPosition().x - otherObject->getLives() * ASTEROID_SIZE , otherObject->getPosition().y + randomNumberAroundZero(ASTEROID_SIZE));
+					Vector2f o2(otherObject->getPosition().x + otherObject->getLives() * ASTEROID_SIZE , otherObject->getPosition().y + randomNumberAroundZero(ASTEROID_SIZE));
 					Asteroid* a1 = new Asteroid(&asteroidTexture, o1, otherObject->getLives() - 1, currentLevel);
 					Asteroid* a2 = new Asteroid(&asteroidTexture, o2, otherObject->getLives() - 1, currentLevel);
 					toBeAdded->push_back(a1);
@@ -366,6 +409,7 @@ vector<GameObject*>* detect_collisions(vector<GameObject*>* gameObjects, GameObj
 					soundExplosion.play();
 				}
 			}
+			//Player and asteroid collisions
 			else if (gameObject->getType() == GOPLAYER && otherObject->getType() == GOASTEROID) {
 				bool collision = false;
 				collision = doCirclesCollide(gameObject->getPosition(), PLAYER_SIZE, otherObject->getPosition(), ASTEROID_SIZE * otherObject->getLives());

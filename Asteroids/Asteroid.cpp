@@ -19,7 +19,7 @@ Asteroid::Asteroid(Texture* texture, Vector2f position, int lives, int level)
 }
 
 void Asteroid::update(float dt) {
-	float speed = ASTEROID_SPEED + 20 * level;
+	float speed = ASTEROID_SPEED + 25 * level;
 	Vector2f position = getPosition();
 	position += velocity * speed * dt;
 	shape.setPosition(wrapAround(position, ASTEROID_SIZE* lives, ASTEROID_SIZE* lives));

@@ -77,3 +77,7 @@ bool isPointInRectangle(Vector2f rectanglePos, Vector2f renctangleSize, Vector2i
 		&& (point.y >= rectanglePos.y) && (point.y <= rectanglePos.y + renctangleSize.y);
 }
 
+float randomNumberAroundZero(float number) {
+	return (-number + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (number * 2))));
+}
+

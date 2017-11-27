@@ -35,6 +35,7 @@ int Player::getType() {
 }
 
 Vector2f Player::getPosition() {
+	//lie about position so player does not collide when its invulnerable
 	if (invulTimer > 0) {
 		return Vector2f(-1000, -1000);
 	}
