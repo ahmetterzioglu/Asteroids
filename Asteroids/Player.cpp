@@ -27,6 +27,7 @@ void Player::collide() {
 		shape.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		velocity = (Vector2f(0, 0));
 		shape.setRotation(0);
+		sound.stop();
 	}
 }
 
